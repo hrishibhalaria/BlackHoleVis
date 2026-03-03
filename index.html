@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Scientifically accurate black hole visualizer with gravitational lensing, accretion disk rendering, and Doppler beaming. Explore M87*, Sagittarius A*, Gargantua, and more." />
+  <title>Black Hole Visualizer — Relativistic Ray Tracer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <canvas id="blackhole-canvas"></canvas>
+
+  <!-- Title & Branding -->
+  <header id="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 40 40" width="32" height="32">
+          <circle cx="20" cy="20" r="8" fill="none" stroke="url(#ring-grad)" stroke-width="2" />
+          <ellipse cx="20" cy="20" rx="18" ry="6" fill="none" stroke="url(#disk-grad)" stroke-width="1.5"
+            opacity="0.8" />
+          <circle cx="20" cy="20" r="5" fill="#000" />
+          <defs>
+            <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff6a00" />
+              <stop offset="100%" stop-color="#ffe066" />
+            </linearGradient>
+            <linearGradient id="disk-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff4500" stop-opacity="0.3" />
+              <stop offset="50%" stop-color="#ffaa00" />
+              <stop offset="100%" stop-color="#ff4500" stop-opacity="0.3" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Black Hole Visualizer</h1>
+        <p class="brand-sub">Relativistic Ray Tracer</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Bar -->
+  <div id="search-container">
+    <div class="search-wrapper">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input type="text" id="search-input" placeholder="Search black holes... (M87*, Sgr A*, Cygnus X-1)"
+        autocomplete="off" />
+      <div id="search-dropdown" class="search-dropdown"></div>
+    </div>
+  </div>
+
+  <!-- Info Card -->
+  <div id="info-card" class="panel">
+    <div class="info-card-header">
+      <h2 id="info-name">Select a Black Hole</h2>
+      <span id="info-category" class="category-badge">—</span>
+    </div>
+    <div class="info-stats">
+      <div class="stat">
+        <span class="stat-label">Mass</span>
+        <span id="info-mass" class="stat-value mono">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Spin</span>
+        <span id="info-spin" class="stat-value mono">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Distance</span>
+        <span id="info-distance" class="stat-value mono">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Type</span>
+        <span id="info-type" class="stat-value">—</span>
+      </div>
+    </div>
+    <p id="info-description" class="info-desc">Use the search bar or controls to explore famous black holes across the
+      universe.</p>
+  </div>
+
+  <!-- Controls Panel -->
+  <div id="controls-panel" class="panel">
+    <h3 class="panel-title">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+      </svg>
+      Parameters
+    </h3>
+    <div class="control-group">
+      <label>Spin Parameter <span class="mono" id="spin-value">0.00</span></label>
+      <input type="range" id="spin-slider" min="0" max="0.998" step="0.001" value="0" />
+      <div class="range-labels"><span>Schwarzschild</span><span>Extremal Kerr</span></div>
+    </div>
+    <div class="control-group">
+      <label>Disk Brightness <span class="mono" id="brightness-value">1.50</span></label>
+      <input type="range" id="brightness-slider" min="0.5" max="4.0" step="0.1" value="1.5" />
+    </div>
+    <div class="control-group">
+      <label>Disk Temperature <span class="mono" id="temperature-value">5500</span>K</label>
+      <input type="range" id="temperature-slider" min="2000" max="30000" step="100" value="5500" />
+    </div>
+    <div class="control-group">
+      <label>Doppler Intensity <span class="mono" id="doppler-value">1.00</span></label>
+      <input type="range" id="doppler-slider" min="0" max="2.0" step="0.05" value="1.0" />
+    </div>
+    <div class="control-group">
+      <label>Ray Quality <span class="mono" id="quality-value">150</span> steps</label>
+      <input type="range" id="quality-slider" min="50" max="400" step="10" value="150" />
+    </div>
+    <div class="control-group">
+      <label>
+        <input type="checkbox" id="disk-toggle" checked /> Show Accretion Disk
+      </label>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <span id="fps-counter" class="mono">60 FPS</span>
+    <span id="resolution-display" class="mono"></span>
+  </div>
+
+  <!-- Keyboard Hint -->
+  <div id="keyboard-hint">
+    <span>🖱️ Drag to orbit</span>
+    <span>⚙️ Scroll to zoom</span>
+    <span>🔍 Search to explore</span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
